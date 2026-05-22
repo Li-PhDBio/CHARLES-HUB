@@ -11,11 +11,10 @@ def cli():
 @pytest.mark.asyncio
 async def test_send_message_builds_correct_command(cli):
     result = await cli.send_message(
-        "zhongshu", "app_id_1", "secret_1",
-        "oc_test", "Hello world",
+        "zhongshu", "oc_test", "Hello world",
     )
-    assert "messenger" in result.stdout
-    assert "send-message" in result.stdout
+    assert "im" in result.stdout
+    assert "+messages-send" in result.stdout
     assert "zhongshu" in result.stdout
     assert "oc_test" in result.stdout
     assert "Hello world" in result.stdout
@@ -24,11 +23,20 @@ async def test_send_message_builds_correct_command(cli):
 @pytest.mark.asyncio
 async def test_send_message_with_reply(cli):
     result = await cli.send_message(
-        "menxia", "app_id_2", "secret_2",
-        "oc_test", "驳回", reply_to="msg_123",
+        "menxia", "oc_test", "驳回", reply_to="om_123",
     )
-    assert "--reply-to" in result.stdout
-    assert "msg_123" in result.stdout
+    assert "+messages-reply" in result.stdout
+    assert "om_123" in result.stdout
+
+
+@pytest.mark.asyncio
+async def test_send_markdown(cli):
+    result = await cli.send_markdown(
+        "zhongshu", "oc_test", "**bold**",
+    )
+    assert "+messages-send" in result.stdout
+    assert "--markdown" in result.stdout
+    assert "**bold**" in result.stdout
 
 
 @pytest.mark.asyncio
