@@ -17,7 +17,7 @@ class Config:
     port: int = int(os.getenv("CHARLES_HUB_PORT", "9800"))
     server_host: str = os.getenv("SERVER_HOST", "210.34.84.181")
     hermes_url: str = os.getenv("HERMES_GATEWAY_URL", "http://127.0.0.1:9119")
-    feishu_cli_path: str = os.getenv("FEISHU_CLI_PATH", "lark")
+    feishu_cli_path: str = os.getenv("FEISHU_CLI_PATH", "lark-cli")
     feishu_chat_id: str = _require("FEISHU_CHAT_ID")
     db_path: str = os.getenv("DB_PATH", "data/charles_hub.db")
 
