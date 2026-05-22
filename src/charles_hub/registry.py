@@ -66,7 +66,7 @@ class AgentRegistry:
     def get_status_summary(self) -> str:
         lines = []
         for a in self.list_all():
-            icon = {"online": "✅", "offline": "❌", "busy": "U0001f504"}.get(a.status, "❓")
+            icon = {"online": "✅", "offline": "❌", "busy": "🔄"}.get(a.status, "❓")
             lines.append(f"{icon} {a.display_name}({a.name}): {a.status} [{a.owner}]")
         return "\n".join(lines)
 
