@@ -80,36 +80,34 @@ class CharlesHub:
             await self._send_as_bot("gongbu", rm.chat_id, response)
 
     async def _send_as_bot(self, profile: str, chat_id: str, content: str):
-        app_id, secret = config.bot_profile(profile)
-        result = await self.feishu.send_message(
-            profile, app_id, secret, chat_id, content,
-        )
+        result = await self.feishu.send_markdown(profile, chat_id, content)
         if not result.success:
             print(f"[HUB] Failed to send as {profile}: {result.stderr}")
 
     async def _feishu_event_loop(self):
-        """Listen for incoming Feishu messages via CLI events (WebSocket)."""
-        app_id, secret = config.bot_profile("zhongshu")
+        """Listen for incoming Feishu messages via CLI event consume."""
         while self._running:
             try:
-                proc = await self.feishu.listen_events("zhongshu", app_id, secret)
+                proc = await self.feishu.listen_events("zhongshu")
                 async for line in proc.stdout:
                     if not self._running:
                         break
                     try:
                         event = json.loads(line.decode("utf-8").strip())
-                        msg_type = event.get("type", "")
-                        if msg_type == "im.message.receive_v1":
-                            msg_data = event.get("message", {})
+                        header = event.get("header", {})
+                        event_type = header.get("event_type", event.get("type", ""))
+                        if event_type == "im.message.receive_v1":
+                            evt = event.get("event", event)
+                            msg = evt.get("message", {})
                             await self._process_message(
-                                raw_content=msg_data.get("content", "{}"),
-                                chat_id=msg_data.get("chat_id", ""),
-                                msg_id=msg_data.get("message_id", ""),
-                                sender=msg_data.get("sender", {}).get("id", "unknown"),
+                                raw_content=json.dumps(msg.get("content", "{}")),
+                                chat_id=msg.get("chat_id", evt.get("chat_id", "")),
+                                msg_id=msg.get("message_id", ""),
+                                sender=evt.get("sender", {}).get("sender_id", {}).get("open_id", "unknown"),
                             )
                     except json.JSONDecodeError:
                         pass
-                await asyncio.sleep(5)  # reconnect delay
+                await asyncio.sleep(5)
             except Exception as e:
                 print(f"[HUB] Feishu event error: {e}, reconnecting...")
                 await asyncio.sleep(5)
@@ -128,10 +126,8 @@ class CharlesHub:
         print("[HUB] Charles Hub starting...")
         self.slumber.start()
 
-        # Start WS server
         ws_task = asyncio.create_task(self.ws_server.start())
 
-        # Send resume on CC connect
         async def on_cc_connect():
             await asyncio.sleep(1)
             await self.ws_server.send_resume()
