@@ -114,9 +114,7 @@ class Storage:
             "SELECT * FROM messages WHERE created_at > ? "
             "AND mentioned_bots LIKE ? "
             "ORDER BY created_at ASC",
-            (since, '%"'
-                     + agent_name
-                     + '"%'),
+            (since, f'%"{agent_name}"%'),
         ).fetchall()
         return [dict(r) for r in rows]
 
