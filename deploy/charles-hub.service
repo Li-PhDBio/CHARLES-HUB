@@ -1,0 +1,15 @@
+[Unit]
+Description=Charles Hub - 三省六部 Multi-Agent Hub
+After=network.target
+
+[Service]
+Type=simple
+User=lisl
+WorkingDirectory=/home/lisl/charles-hub
+ExecStart=/home/lisl/charles-hub/.venv/bin/python -m charles_hub.main
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/lisl/charles-hub/.env
+
+[Install]
+WantedBy=multi-user.target
